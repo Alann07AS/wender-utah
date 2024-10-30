@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Évaluation TDAH</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .description {
+            text-align: left;
+            font-weight: bold;
+        }
+
+        #downloadButton {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+        }
+
+
+        .sticky-row {
+                position: sticky;
+                top: 0;
+                background-color: #f2f2f2;
+                z-index: 1;
+                /* pour rester par-dessus d’autres éléments si besoin */
+            }
+
+
+        .medialab {
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+
+            th,
+            td {
+                padding: 5px;
+                font-size: 14px;
+            }
+
+            .description {
+                font-size: 14px;
+            }
+
+            #downloadButton {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            table,
+            th,
+            td {
+                display: block;
+                max-width: 100vw;
+            }
+
+            th {
+                display: none;
+            }
+
+            td {
+                display: flex;
+                justify-content: space-between;
+                padding: 10px;
+            }
+
+            td:before {
+                content: attr(data-label);
+                font-weight: bold;
+                text-align: left;
+            }
+
+            .description {
+                font-size: 13px;
+                background-color: #f2f2f2;
+            }
+
+            #downloadButton {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            .medialab {
+                display: inline;
+            }
+
+            .mainlabel {
+                display: none;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Évaluation des Comportements en Enfance</h1>
+    <p>Instructions: Voici une liste d'items concernant des comportements ou des problèmes que peuvent avoir présentés
+        les gens avec un TDAH dans leur enfance. Lisez ces items et indiquez votre réponse en fonction du barème.</p>
+
+    <table id="evaluationTable">
+        <thead>
+            <tr class="sticky-row">
+                <td class="description">DURANT MON ENFANCE, J'ÉTAIS (OU J'AVAIS) *12 ANS (6 ANNÉE)</th>
+                <td class="mainlabel" data-label="Pas du tout">0 - Pas du tout</td>
+                <td class="mainlabel" data-label="Juste un peu">1 - Juste un peu</td>
+                <td class="mainlabel" data-label="Légèrement">2 - Légèrement</td>
+                <td class="mainlabel" data-label="Modérément">3 - Modérément</td>
+                <td class="mainlabel" data-label="Énormément">4 - Énormément</td>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button id="downloadButton" onclick="downloadResults()">Télécharger le document avec score total</button>
+
+    <script>
+        const questions = [
+            { "id": 1, "question": "Des problèmes de concentration; facilement distrait" },
+            { "id": 2, "question": "Anxieux, préoccupé" },
+            { "id": 3, "question": "Nerveux, agité" },
+            { "id": 4, "question": "Inattentif, rêveur (dans la lune)" },
+            { "id": 5, "question": "Impatient" },
+            { "id": 6, "question": "Un tempérament explosif, colérique" },
+            { "id": 7, "question": "Difficultés à compléter les tâches entreprises (difficulté à persévérer)" },
+            { "id": 8, "question": "Entêté, déterminé" },
+            { "id": 9, "question": "Triste, mélancolique, déprimé, malheureux" },
+            { "id": 10, "question": "Désobéissant avec mes parents, rebelle (insolent, effronté ou impoli)" },
+            { "id": 11, "question": "Une faible estime de moi-même" },
+            { "id": 12, "question": "Irritable" },
+            { "id": 13, "question": "Des changements d'humeur en fonction des événements; des hauts et des bas" },
+            { "id": 14, "question": "Des sentiments de rage (ou souvent enragé)" },
+            { "id": 15, "question": "Tendance à agir sans réfléchir, impulsif" },
+            { "id": 16, "question": "Tendance à être immature" },
+            { "id": 17, "question": "Des sentiments de culpabilité, des regrets" },
+            { "id": 18, "question": "Des pertes de contrôle de moi-même" },
+            { "id": 19, "question": "Tendance à penser ou à agir de manière irrationnelle" },
+            { "id": 20, "question": "Impopulaire auprès des autres enfants; difficulté à garder des amis longtemps; difficulté à m'entendre avec les autres enfants" },
+            { "id": 21, "question": "Des difficultés à voir les choses du point de vue d'autrui" },
+            { "id": 22, "question": "Des problèmes avec l'autorité, avec l'école; visites chez le directeur" },
+            { "id": 23, "question": "En général un étudiant faible, lent à apprendre" },
+            { "id": 24, "question": "De la difficulté avec les mathématiques ou les chiffres" },
+            { "id": 25, "question": "Ne réussissait pas à mon plein potentiel" }
+        ];
+        const labs = []
+        labs[0] = "0 - Pas du tout",
+            labs[1] = "1 - Juste un peu",
+            labs[2] = "2 - Légèrement",
+            labs[3] = "3 - Modérément",
+            labs[4] = "4 - Énormément"
+        function generateTable() {
+            const tbody = document.querySelector('#evaluationTable tbody');
+            questions.forEach(item => {
+                const row = document.createElement('tr');
+                const descriptionCell = document.createElement('td');
+                descriptionCell.className = 'description';
+                descriptionCell.textContent = item.question;
+                row.appendChild(descriptionCell);
+
+                for (let i = 0; i <= 4; i++) {
+                    const cell = document.createElement('td');
+                    const checkbox = document.createElement('input');
+                    const label = document.createElement('label');
+                    label.innerText = labs[i]
+                    label.classList.add('medialab')
+                    checkbox.type = 'checkbox';
+                    checkbox.name = `q${item.id}`;
+                    checkbox.value = i;
+                    checkbox.addEventListener('change', handleCheckboxChange);
+                    cell.appendChild(label);
+                    cell.appendChild(checkbox);
+                    row.appendChild(cell);
+                }
+
+                tbody.appendChild(row);
+            });
+        }
+
+        function handleCheckboxChange(event) {
+            const checkboxes = document.querySelectorAll(`input[name="${event.target.name}"]`);
+            checkboxes.forEach(box => {
+                if (box !== event.target) box.checked = false;
+            });
+        }
+
+        function calculateTotalScore() {
+            let totalScore = 0;
+            questions.forEach(item => {
+                const selectedCheckbox = document.querySelector(`input[name="q${item.id}"]:checked`);
+                if (selectedCheckbox) {
+                    totalScore += parseInt(selectedCheckbox.value);
+                }
+            });
+            return totalScore;
+        }
+
+        function downloadResults() {
+            let content = "Évaluation des Comportements en Enfance\n\n";
+            questions.forEach(item => {
+                const selectedCheckbox = document.querySelector(`input[name="q${item.id}"]:checked`);
+                const score = selectedCheckbox ? labs[selectedCheckbox.value] : "Non répondu";
+                content += `${item.id}. ${item.question}: ${score}\n`;
+            });
+            content += `\nScore Total: ${calculateTotalScore()}`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'evaluation_tdah.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        generateTable();
+    </script>
+
+</body>
+
+</html>
